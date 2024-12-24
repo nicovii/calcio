@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Score Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .scoreboard {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .team-names {
+            margin-bottom: 20px;
+        }
+        .team-names input {
+            padding: 5px;
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        .voice-selector, .additional-buttons {
+            margin-bottom: 20px;
+        }
+        .voice-selector select {
+            padding: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard">
+        <h1>Football Score Counter</h1>
+        <div class="team-names">
+            <input type="text" id="teamAName" placeholder="Team A" value="Team A" onchange="updateDisplay()">
+            <input type="text" id="teamBName" placeholder="Team B" value="Team B" onchange="updateDisplay()">
+        </div>
+        <div class="voice-selector">
+            <label for="voiceSelect">Select Voice:</label>
+            <select id="voiceSelect"></select>
+        </div>
+        <div class="score" id="score">0 - 0</div>
+    </div>
+    <div class="buttons">
+        <button onclick="updateScore('teamA', 1)">Team A +1</button>
+        <button onclick="updateScore('teamA', -1)">Team A -1</button>
+        <button onclick="updateScore('teamB', 1)">Team B +1</button>
+        <button onclick="updateScore('teamB', -1)">Team B -1</button>
+        <button onclick="resetScores()">Reset Scores</button>
+        <button onclick="toggleMute()" id="muteButton">Mute</button>
+    </div>
+
+    <script>
+        let score = { teamA: 0, teamB: 0 };
+        let voices = [];
+        let isMuted = false;
+        const audioFiles = [
+            "audio1.mp3",
+            "audio2.mp3",
+            "audio3.mp3"
+        ];
+
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = '';
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        function updateScore(team, change) {
+            score[team] = Math.max(0, score[team] + change); // Ensure score doesn't go below 0
+            updateDisplay();
+            playRandomAudio();
+        }
+
+        function resetScores() {
+            score = { teamA: 0, teamB: 0 };
+            updateDisplay();
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteButton = document.getElementById('muteButton');
+            muteButton.textContent = isMuted ? "Unmute" : "Mute";
+        }
+
+        function updateDisplay() {
+            const teamAName = document.getElementById('teamAName').value || 'Team A';
+            const teamBName = document.getElementById('teamBName').value || 'Team B';
+            const scoreText = `${teamAName} ${score.teamA} - ${teamBName} ${score.teamB}`;
+            document.getElementById('score').textContent = scoreText;
+            if (!isMuted) {
+                speakScore(scoreText);
+            }
+        }
+
+        function speakScore(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            const selectedVoiceIndex = document.getElementById('voiceSelect').value;
+            if (voices[selectedVoiceIndex]) {
+                utterance.voice = voices[selectedVoiceIndex];
+            }
+            speechSynthesis.speak(utterance);
+        }
+
+        function playRandomAudio() {
+            if (audioFiles.length > 0 && !isMuted) {
+                const randomIndex = Math.floor(Math.random() * audioFiles.length);
+                const audio = new Audio(audioFiles[randomIndex]);
+                audio.play();
+            }
+        }
+
+        speechSynthesis.addEventListener('voiceschanged', loadVoices);
+        loadVoices();
+    </script>
+</body>
+</html>
