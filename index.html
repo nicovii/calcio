@@ -43,7 +43,7 @@
             border-top: 2px solid #ccc;
             padding-top: 20px;
         }
-        .team select, .player-selector select {
+        .team select, .player-selector select, .voice-selector select {
             width: 80%;
             padding: 5px;
             font-size: 14px;
@@ -56,6 +56,10 @@
         <div>
             <input type="text" id="teamAName" placeholder="Team A" value="Team A" onchange="updateDisplay()">
             <input type="text" id="teamBName" placeholder="Team B" value="Team B" onchange="updateDisplay()">
+        </div>
+        <div class="voice-selector">
+            <label for="voiceSelect">Select Voice:</label>
+            <select id="voiceSelect"></select>
         </div>
         <div class="score" id="score">0 - 0</div>
     </div>
@@ -72,6 +76,7 @@
         <div class="team">
             <h2>Team A</h2>
             <select id="teamAPlayers" multiple size="6"></select>
+            <button onclick="resetTeamA()">Reset Team A</button>
         </div>
         <div>
             <h2>Available Players</h2>
@@ -97,6 +102,7 @@
         <div class="team">
             <h2>Team B</h2>
             <select id="teamBPlayers" multiple size="6"></select>
+            <button onclick="resetTeamB()">Reset Team B</button>
         </div>
     </div>
 
@@ -116,6 +122,20 @@
             Edo: 'Edo/',
             Mora: 'Mora/'
         };
+        let voices = [];
+        let isMuted = false;
+
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voiceSelect');
+            voiceSelect.innerHTML = '';
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+        }
 
         function updateScore(team, change) {
             score[team] = Math.max(0, score[team] + change);
@@ -132,6 +152,15 @@
             const teamAName = document.getElementById('teamAName').value || 'Team A';
             const teamBName = document.getElementById('teamBName').value || 'Team B';
             document.getElementById('score').textContent = `${teamAName} ${score.teamA} - ${teamBName} ${score.teamB}`;
+            if (!isMuted) speakScore(`${teamAName} ${score.teamA} - ${teamBName} ${score.teamB}`);
+        }
+
+        function speakScore(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            const selectedVoiceIndex = document.getElementById('voiceSelect').value;
+            if (voices[selectedVoiceIndex]) utterance.voice = voices[selectedVoiceIndex];
+            speechSynthesis.speak(utterance);
         }
 
         function addPlayerToTeam(team) {
@@ -147,6 +176,14 @@
             }
         }
 
+        function resetTeamA() {
+            document.getElementById('teamAPlayers').innerHTML = '';
+        }
+
+        function resetTeamB() {
+            document.getElementById('teamBPlayers').innerHTML = '';
+        }
+
         function playRandomAudio(team) {
             const teamPlayers = document.getElementById(team + 'Players');
             const playerList = Array.from(teamPlayers.options).map(option => option.value);
@@ -159,6 +196,9 @@
                 audio.play();
             }
         }
+
+        speechSynthesis.addEventListener('voiceschanged', loadVoices);
+        loadVoices();
     </script>
 </body>
 </html>
