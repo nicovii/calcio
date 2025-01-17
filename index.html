@@ -15,22 +15,15 @@
             margin: 0;
             background-color: #f4f4f9;
         }
-        .scoreboard {
+        .scoreboard, .buttons, .team-builder {
             text-align: center;
-            margin-bottom: 20px;
         }
         .score {
             font-size: 48px;
             font-weight: bold;
             margin: 10px 0;
         }
-        .buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        button {
+        .buttons button {
             padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
@@ -39,23 +32,8 @@
             border: none;
             border-radius: 5px;
         }
-        button:hover {
+        .buttons button:hover {
             background-color: #0056b3;
-        }
-        .team-names {
-            margin-bottom: 20px;
-        }
-        .team-names input {
-            padding: 5px;
-            font-size: 16px;
-            margin: 0 5px;
-        }
-        .voice-selector, .additional-buttons {
-            margin-bottom: 20px;
-        }
-        .voice-selector select {
-            padding: 5px;
-            font-size: 16px;
         }
         .team-builder {
             display: flex;
@@ -65,23 +43,8 @@
             border-top: 2px solid #ccc;
             padding-top: 20px;
         }
-        .team {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        .team select {
+        .team select, .player-selector select {
             width: 80%;
-            padding: 5px;
-            font-size: 14px;
-        }
-        .team-builder-controls {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .team-builder-controls select {
             padding: 5px;
             font-size: 14px;
         }
@@ -90,13 +53,9 @@
 <body>
     <div class="scoreboard">
         <h1>Football Score Counter</h1>
-        <div class="team-names">
+        <div>
             <input type="text" id="teamAName" placeholder="Team A" value="Team A" onchange="updateDisplay()">
             <input type="text" id="teamBName" placeholder="Team B" value="Team B" onchange="updateDisplay()">
-        </div>
-        <div class="voice-selector">
-            <label for="voiceSelect">Select Voice:</label>
-            <select id="voiceSelect"></select>
         </div>
         <div class="score" id="score">0 - 0</div>
     </div>
@@ -107,7 +66,6 @@
         <button onclick="updateScore('teamB', 1)">Team B +1</button>
         <button onclick="updateScore('teamB', -1)">Team B -1</button>
         <button onclick="resetScores()">Reset Scores</button>
-        <button onclick="toggleMute()" id="muteButton">Mute</button>
     </div>
 
     <div class="team-builder">
@@ -115,29 +73,26 @@
             <h2>Team A</h2>
             <select id="teamAPlayers" multiple size="6"></select>
         </div>
-        <div class="team-builder-controls">
-            <h2>Build Teams</h2>
-            <label for="availablePlayers">Available Players:</label>
-            <select id="availablePlayers" multiple size="6">
-                <option value="Tommy">Tommy</option>
-                <option value="Greca">Greca</option>
-                <option value="Stefapro22">Stefapro22</option>
-                <option value="Abe">Abe</option>
-                <option value="Fede">Fede</option>
-                <option value="Riki">Riki</option>
-                <option value="Cri">Cri</option>
-                <option value="ElMagoBario">ElMagoBario</option>
-                <option value="Farina">Farina</option>
-                <option value="Mandala">Mandala</option>
-                <option value="Edo">Edo</option>
-                <option value="Mora">Mora</option>
-            </select>
-            <div>
-                <button onclick="addToTeam('teamA')">Add to Team A</button>
-                <button onclick="addToTeam('teamB')">Add to Team B</button>
+        <div>
+            <h2>Available Players</h2>
+            <div class="player-selector">
+                <select id="playerSelector">
+                    <option value="Tommy">Tommy</option>
+                    <option value="Greca">Greca</option>
+                    <option value="Stefapro22">Stefapro22</option>
+                    <option value="Abe">Abe</option>
+                    <option value="Fede">Fede</option>
+                    <option value="Riki">Riki</option>
+                    <option value="Cri">Cri</option>
+                    <option value="ElMagoBario">ElMagoBario</option>
+                    <option value="Farina">Farina</option>
+                    <option value="Mandala">Mandala</option>
+                    <option value="Edo">Edo</option>
+                    <option value="Mora">Mora</option>
+                </select>
             </div>
-            <button onclick="resetTeamA()">Reset Team A</button>
-            <button onclick="resetTeamB()">Reset Team B</button>
+            <button onclick="addPlayerToTeam('teamA')">Add to Team A</button>
+            <button onclick="addPlayerToTeam('teamB')">Add to Team B</button>
         </div>
         <div class="team">
             <h2>Team B</h2>
@@ -147,24 +102,25 @@
 
     <script>
         let score = { teamA: 0, teamB: 0 };
-        let voices = [];
-        let isMuted = false;
-
-        function loadVoices() {
-            voices = speechSynthesis.getVoices();
-            const voiceSelect = document.getElementById('voiceSelect');
-            voiceSelect.innerHTML = '';
-            voices.forEach((voice, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelect.appendChild(option);
-            });
-        }
+        const playerDirectories = {
+            Tommy: 'Tommy/',
+            Greca: 'Greca/',
+            Stefapro22: 'Stefapro22/',
+            Abe: 'Abe/',
+            Fede: 'Fede/',
+            Riki: 'Riki/',
+            Cri: 'Cri/',
+            ElMagoBario: 'ElMagoBario/',
+            Farina: 'Farina/',
+            Mandala: 'Mandala/',
+            Edo: 'Edo/',
+            Mora: 'Mora/'
+        };
 
         function updateScore(team, change) {
-            score[team] = Math.max(0, score[team] + change); // Ensure score doesn't go below 0
+            score[team] = Math.max(0, score[team] + change);
             updateDisplay();
+            playRandomAudio(team);
         }
 
         function resetScores() {
@@ -172,52 +128,37 @@
             updateDisplay();
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            document.getElementById('muteButton').textContent = isMuted ? "Unmute" : "Mute";
-        }
-
         function updateDisplay() {
             const teamAName = document.getElementById('teamAName').value || 'Team A';
             const teamBName = document.getElementById('teamBName').value || 'Team B';
-            const scoreText = `${teamAName} ${score.teamA} - ${teamBName} ${score.teamB}`;
-            document.getElementById('score').textContent = scoreText;
-            if (!isMuted) speakScore(scoreText);
+            document.getElementById('score').textContent = `${teamAName} ${score.teamA} - ${teamBName} ${score.teamB}`;
         }
 
-        function speakScore(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1;
-            const selectedVoiceIndex = document.getElementById('voiceSelect').value;
-            if (voices[selectedVoiceIndex]) utterance.voice = voices[selectedVoiceIndex];
-            speechSynthesis.speak(utterance);
+        function addPlayerToTeam(team) {
+            const playerSelector = document.getElementById('playerSelector');
+            const selectedPlayer = playerSelector.value;
+            const teamPlayers = document.getElementById(team + 'Players');
+
+            if (![...teamPlayers.options].some(option => option.value === selectedPlayer)) {
+                const newOption = document.createElement('option');
+                newOption.value = selectedPlayer;
+                newOption.textContent = selectedPlayer;
+                teamPlayers.appendChild(newOption);
+            }
         }
 
-        function addToTeam(team) {
-            const availablePlayers = document.getElementById('availablePlayers');
-            const teamPlayers = document.getElementById(team === 'teamA' ? 'teamAPlayers' : 'teamBPlayers');
-            const otherTeamPlayers = document.getElementById(team === 'teamA' ? 'teamBPlayers' : 'teamAPlayers');
+        function playRandomAudio(team) {
+            const teamPlayers = document.getElementById(team + 'Players');
+            const playerList = Array.from(teamPlayers.options).map(option => option.value);
 
-            Array.from(availablePlayers.selectedOptions).forEach(option => {
-                if (![...teamPlayers.options, ...otherTeamPlayers.options].some(o => o.value === option.value)) {
-                    const newOption = document.createElement('option');
-                    newOption.value = option.value;
-                    newOption.textContent = option.textContent;
-                    teamPlayers.appendChild(newOption);
-                }
-            });
+            if (playerList.length > 0) {
+                const randomPlayer = playerList[Math.floor(Math.random() * playerList.length)];
+                const directory = playerDirectories[randomPlayer];
+                const randomAudio = `${directory}audio${Math.floor(Math.random() * 5) + 1}.mp3`; // Example: audio1.mp3 to audio5.mp3
+                const audio = new Audio(randomAudio);
+                audio.play();
+            }
         }
-
-        function resetTeamA() {
-            document.getElementById('teamAPlayers').innerHTML = '';
-        }
-
-        function resetTeamB() {
-            document.getElementById('teamBPlayers').innerHTML = '';
-        }
-
-        speechSynthesis.addEventListener('voiceschanged', loadVoices);
-        loadVoices();
     </script>
 </body>
 </html>
