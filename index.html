@@ -136,7 +136,8 @@
                 <button onclick="addToTeam('teamA')">Add to Team A</button>
                 <button onclick="addToTeam('teamB')">Add to Team B</button>
             </div>
-            <button onclick="resetTeams()">Reset Teams</button>
+            <button onclick="resetTeamA()">Reset Team A</button>
+            <button onclick="resetTeamB()">Reset Team B</button>
         </div>
         <div class="team">
             <h2>Team B</h2>
@@ -207,9 +208,12 @@
             });
         }
 
-        function resetTeams() {
+        function resetTeamA() {
             document.getElementById('teamAPlayers').innerHTML = '';
-            document.getElementById('teamBPlayers').innerHTML = '';
+        }
+
+        function resetTeamB() {
+            document.getElementById('teamAPlayers').innerHTML = '';
         }
 
         speechSynthesis.addEventListener('voiceschanged', loadVoices);
