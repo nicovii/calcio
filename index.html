@@ -191,7 +191,7 @@
             if (playerList.length > 0) {
                 const randomPlayer = playerList[Math.floor(Math.random() * playerList.length)];
                 const directory = playerDirectories[randomPlayer];
-                const randomAudio = `${directory}audio${Math.floor(Math.random() * 5) + 1}.mp3`; // Example: audio1.mp3 to audio5.mp3
+                const randomAudio = `${directory}audio${Math.floor(Math.random() * 1) + 1}.mp3`; // Example: audio1.mp3 to audio5.mp3
                 const audio = new Audio(randomAudio);
                 audio.play();
             }
