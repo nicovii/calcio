@@ -59,6 +59,7 @@
         }
         .player-list {
             display: flex;
+            flex-direction: column;
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -71,6 +72,9 @@
             padding: 5px;
             font-size: 14px;
         }
+        .team-builder {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -80,36 +84,48 @@
             <input type="text" id="teamAName" placeholder="Team A" value="Team A" onchange="updateDisplay()">
             <input type="text" id="teamBName" placeholder="Team B" value="Team B" onchange="updateDisplay()">
         </div>
-        <div class="player-list">
-            <div>
-                <label for="teamAPlayers">Team A Players:</label>
-                <select id="teamAPlayers" multiple size="6">
-                    <option value="Tommy">Tommy</option>
-                    <option value="Greca">Greca</option>
-                    <option value="Stefapro22">Stefapro22</option>
-                    <option value="Abe">Abe</option>
-                    <option value="Fede">Fede</option>
-                    <option value="Riki">Riki</option>
-                </select>
-            </div>
-            <div>
-                <label for="teamBPlayers">Team B Players:</label>
-                <select id="teamBPlayers" multiple size="6">
-                    <option value="Cri">Cri</option>
-                    <option value="ElMagoBario">ElMagoBario</option>
-                    <option value="Farina">Farina</option>
-                    <option value="Mandala">Mandala</option>
-                    <option value="Edo">Edo</option>
-                    <option value="Mora">Mora</option>
-                </select>
-            </div>
-        </div>
         <div class="voice-selector">
             <label for="voiceSelect">Select Voice:</label>
             <select id="voiceSelect"></select>
         </div>
         <div class="score" id="score">0 - 0</div>
     </div>
+
+    <div class="team-builder">
+        <h2>Build Teams</h2>
+        <div>
+            <label for="availablePlayers">Available Players:</label>
+            <select id="availablePlayers" multiple size="6">
+                <option value="Tommy">Tommy</option>
+                <option value="Greca">Greca</option>
+                <option value="Stefapro22">Stefapro22</option>
+                <option value="Abe">Abe</option>
+                <option value="Fede">Fede</option>
+                <option value="Riki">Riki</option>
+                <option value="Cri">Cri</option>
+                <option value="ElMagoBario">ElMagoBario</option>
+                <option value="Farina">Farina</option>
+                <option value="Mandala">Mandala</option>
+                <option value="Edo">Edo</option>
+                <option value="Mora">Mora</option>
+            </select>
+        </div>
+        <div>
+            <button onclick="addToTeam('teamA')">Add to Team A</button>
+            <button onclick="addToTeam('teamB')">Add to Team B</button>
+        </div>
+        <div class="player-list">
+            <div>
+                <label for="teamAPlayers">Team A Players:</label>
+                <select id="teamAPlayers" multiple size="6"></select>
+            </div>
+            <div>
+                <label for="teamBPlayers">Team B Players:</label>
+                <select id="teamBPlayers" multiple size="6"></select>
+            </div>
+        </div>
+    </div>
+
     <div class="buttons">
         <button onclick="updateScore('teamA', 1)">Team A +1</button>
         <button onclick="updateScore('teamA', -1)">Team A -1</button>
@@ -187,9 +203,23 @@
             speechSynthesis.speak(utterance);
         }
 
+        function addToTeam(team) {
+            const availablePlayers = document.getElementById('availablePlayers');
+            const teamPlayers = document.getElementById(team === 'teamA' ? 'teamAPlayers' : 'teamBPlayers');
+
+            Array.from(availablePlayers.selectedOptions).forEach(option => {
+                if (![...teamPlayers.options].some(o => o.value === option.value)) {
+                    const newOption = document.createElement('option');
+                    newOption.value = option.value;
+                    newOption.textContent = option.textContent;
+                    teamPlayers.appendChild(newOption);
+                }
+            });
+        }
+
         function playRandomPlayerAudio(team) {
-            const playerSelect = team === 'teamA' ? document.getElementById('teamAPlayers') : document.getElementById('teamBPlayers');
-            const selectedPlayers = Array.from(playerSelect.selectedOptions).map(option => option.value);
+            const teamPlayers = document.getElementById(team === 'teamA' ? 'teamAPlayers' : 'teamBPlayers');
+            const selectedPlayers = Array.from(teamPlayers.options).map(option => option.value);
 
             if (selectedPlayers.length > 0 && !isMuted) {
                 const randomPlayer = selectedPlayers[Math.floor(Math.random() * selectedPlayers.length)];
