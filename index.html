@@ -140,7 +140,9 @@
         function updateScore(team, change) {
             score[team] = Math.max(0, score[team] + change);
             updateDisplay();
-            playRandomAudio(team);
+            if(change > 0){
+                playRandomAudio(team);   
+            }
         }
 
         function resetScores() {
