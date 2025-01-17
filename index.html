@@ -57,6 +57,20 @@
             padding: 5px;
             font-size: 16px;
         }
+        .player-list {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .player-list div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .player-list select {
+            padding: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -65,6 +79,30 @@
         <div class="team-names">
             <input type="text" id="teamAName" placeholder="Team A" value="Team A" onchange="updateDisplay()">
             <input type="text" id="teamBName" placeholder="Team B" value="Team B" onchange="updateDisplay()">
+        </div>
+        <div class="player-list">
+            <div>
+                <label for="teamAPlayers">Team A Players:</label>
+                <select id="teamAPlayers" multiple size="6">
+                    <option value="Tommy">Tommy</option>
+                    <option value="Greca">Greca</option>
+                    <option value="Stefapro22">Stefapro22</option>
+                    <option value="Abe">Abe</option>
+                    <option value="Fede">Fede</option>
+                    <option value="Riki">Riki</option>
+                </select>
+            </div>
+            <div>
+                <label for="teamBPlayers">Team B Players:</label>
+                <select id="teamBPlayers" multiple size="6">
+                    <option value="Cri">Cri</option>
+                    <option value="ElMagoBario">ElMagoBario</option>
+                    <option value="Farina">Farina</option>
+                    <option value="Mandala">Mandala</option>
+                    <option value="Edo">Edo</option>
+                    <option value="Mora">Mora</option>
+                </select>
+            </div>
         </div>
         <div class="voice-selector">
             <label for="voiceSelect">Select Voice:</label>
@@ -85,9 +123,20 @@
         let score = { teamA: 0, teamB: 0 };
         let voices = [];
         let isMuted = false;
-        const audioFiles = [
-            "audio1.mp3"
-        ];
+        const playerDirectories = {
+            Tommy: 'Tommy/',
+            Greca: 'Greca/',
+            Stefapro22: 'Stefapro22/',
+            Abe: 'Abe/',
+            Fede: 'Fede/',
+            Riki: 'Riki/',
+            Cri: 'Cri/',
+            ElMagoBario: 'ElMagoBario/',
+            Farina: 'Farina/',
+            Mandala: 'Mandala/',
+            Edo: 'Edo/',
+            Mora: 'Mora/'
+        };
 
         function loadVoices() {
             voices = speechSynthesis.getVoices();
@@ -104,7 +153,7 @@
         function updateScore(team, change) {
             score[team] = Math.max(0, score[team] + change); // Ensure score doesn't go below 0
             updateDisplay();
-            playRandomAudio();
+            playRandomPlayerAudio(team);
         }
 
         function resetScores() {
@@ -138,11 +187,17 @@
             speechSynthesis.speak(utterance);
         }
 
-        function playRandomAudio() {
-            if (audioFiles.length > 0 && !isMuted) {
-                const randomIndex = Math.floor(Math.random() * audioFiles.length);
-                const audio = new Audio(audioFiles[randomIndex]);
-                audio.play();
+        function playRandomPlayerAudio(team) {
+            const playerSelect = team === 'teamA' ? document.getElementById('teamAPlayers') : document.getElementById('teamBPlayers');
+            const selectedPlayers = Array.from(playerSelect.selectedOptions).map(option => option.value);
+
+            if (selectedPlayers.length > 0 && !isMuted) {
+                const randomPlayer = selectedPlayers[Math.floor(Math.random() * selectedPlayers.length)];
+                const playerDirectory = playerDirectories[randomPlayer];
+                if (playerDirectory) {
+                    const audio = new Audio(`${playerDirectory}audio${Math.floor(Math.random() * 5) + 1}.mp3`); // Random audio from 1 to 5
+                    audio.play();
+                }
             }
         }
 
